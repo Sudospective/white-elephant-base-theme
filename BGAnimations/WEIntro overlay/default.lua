@@ -28,6 +28,10 @@ af[#af + 1] = Def.Text {
       :sleep(3)
       :linear(1)
       :diffusealpha(0)
+      :queuecommand("NextScreen")
+  end,
+  NextScreenCommand = function(self)
+    SCREENMAN:GetTopScreen():StartTransitioningScreen("SM_GoToNextScreen")
   end,
 }
 
