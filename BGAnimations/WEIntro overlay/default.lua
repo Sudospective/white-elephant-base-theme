@@ -1,5 +1,7 @@
 local af = Def.ActorFrame {}
 
+local online_dir = THEME:GetCurrentThemeDirectory().."Online/"
+
 af[#af + 1] = Def.Quad {
   InitCommand = function(self)
     self
