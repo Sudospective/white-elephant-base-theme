@@ -8,15 +8,15 @@ local actor = Def.Actor {}
 local function send_request(data)
   local now = GetTimeSinceStart()
   local time = 0
+  File.Write(path.."receive.txt", "")
   local req = coroutine.create(function(d)
-    File.Write(path.."receive.txt", "")
-    local j = JsonEncode(data)
-    File.Write(path.."send.txt", data)
+    local j = JsonEncode(d, true)
+    File.Write(path.."send.txt", j)
     while true do
       time = time + (GetTimeSinceStart() - now)
       now = GetTimeSinceStart()
       local res = File.Read(path.."receive.txt")
-      if res then
+      if res ~= "" then
         coroutine.yield(JsonDecode(res))
         break
       end
@@ -36,14 +36,14 @@ local function send_request(data)
   return ret
 end
 
-function we.Ping()
-  local data = {
+function we.ping()
+  local packet = {
     command = 0,
     data = {
       message = "Ping"
     }
   }
-  return send_request(data)
+  return send_request(packet)
 end
 
-return gs
+return we
