@@ -16,7 +16,7 @@ af[#af + 1] = Def.Text {
   Size = 64,
   StrokeSize = 2,
   InitCommand = function(self)
-    self:Center()
+    self:Center():addy(32)
     self:MainActor()
       :diffuse(0, 0, 0, 1)
     self:StrokeActor()

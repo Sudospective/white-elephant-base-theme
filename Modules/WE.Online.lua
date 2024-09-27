@@ -9,7 +9,7 @@ local server_offset = 128
 GAMESTATE:Env().WEOnlineID = GAMESTATE:Env().WEOnlineID or CRYPTMAN:GenerateRandomUUID()
 local id = GAMESTATE:Env().WEOnlineID
 
-local actor = Def.Actor {}
+local actor = Def.ActorFrame {}
 
 local function msg(m)
   SCREENMAN:SystemMessage("WEOnline: "..m)
@@ -19,7 +19,7 @@ local function err(m)
   SCREENMAN:SystemMessage("WEOnline Error: "..m)
 end
 
-local function send_request(data, response)
+local function send_request(packet, response)
   response = response or true
   if status ~= "connected" then
     err("Not connected.")
@@ -28,8 +28,8 @@ local function send_request(data, response)
   local now = GetTimeSinceStart()
   local time = 0
   File.Write(path.."receive.txt", "")
-  local req = coroutine.create(function(d)
-    local j = JsonEncode(d, true)
+  local req = coroutine.create(function(p)
+    local j = JsonEncode(p, true)
     File.Write(path.."send.txt", j)
     while true do
       time = time + (GetTimeSinceStart() - now)
@@ -51,8 +51,15 @@ local function send_request(data, response)
       end
     end
   end)
-  local s, ret = coroutine.resume(req, data)
+  local s, ret = coroutine.resume(req, packet)
   if ret and response then MESSAGEMAN:Broadcast("Response", ret) end
+end
+
+local function receive_request()
+  --[[
+    TODO: figure out this part
+    (is this even needed?) ~Sudo
+  --]]
 end
 
 function we.get_status()
@@ -90,6 +97,10 @@ function we.client_event(info)
     packet.data[k] = v
   end
   send_request(packet)
+end
+
+actor.OnCommand = function(self)
+  self:SetUpdateFunction(receive_request)
 end
 
 actor.ResponseMessageCommand = function(self, ret)
