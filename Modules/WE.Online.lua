@@ -4,6 +4,7 @@ local path = THEME:GetCurrentThemeDirectory().."Online/"
 local timeout = 5
 local status = "invalid"
 local ping = 0
+local sending = false
 
 local server_offset = 128
 GAMESTATE:Env().WEOnlineID = GAMESTATE:Env().WEOnlineID or CRYPTMAN:GenerateRandomUUID()
@@ -20,6 +21,7 @@ local function err(m)
 end
 
 local function send_request(packet, response)
+  sending = true
   response = response or true
   if status ~= "connected" then
     err("Not connected.")
@@ -53,6 +55,7 @@ local function send_request(packet, response)
   end)
   local s, ret = coroutine.resume(req, packet)
   if ret and response then MESSAGEMAN:Broadcast("Response", ret) end
+  sending = false
 end
 
 local function receive_request()
@@ -60,6 +63,10 @@ local function receive_request()
     TODO: figure out this part
     (is this even needed?) ~Sudo
   --]]
+  if sending then return end
+  local packet = File.Read(path.."receive.text")
+  if packet == "" then return end
+  MESSAGEMAN:Broadcast("Response", packet)
 end
 
 function we.get_status()
@@ -138,7 +145,7 @@ actor.ResponseMessageCommand = function(self, ret)
     local action = ret.data.action
     if action == 0 then
       PrintTable(res.data.players)
-      packet = {
+      local packet = {
         command = 4,
         data = {
           action == 0,

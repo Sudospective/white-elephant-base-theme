@@ -2,6 +2,7 @@ local we = LoadModule("WE.Online.lua")
 
 local handler = function(self)
   return function(event)
+    self.Player = ToEnumShortString(event.PlayerNumber)
     self:queuecommand(event.GameButton..ToEnumShortString(event.type))
   end
 end
