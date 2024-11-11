@@ -27,9 +27,9 @@ local function send_request(packet, response)
     err("Not connected.")
     return
   end
+  File.Write(path.."receive.txt", "")
   local now = GetTimeSinceStart()
   local time = 0
-  File.Write(path.."receive.txt", "")
   local req = coroutine.create(function(p)
     local j = JsonEncode(p, true)
     File.Write(path.."send.txt", j)
@@ -53,7 +53,7 @@ local function send_request(packet, response)
       end
     end
   end)
-  local s, ret = coroutine.resume(req, packet)
+  local _, ret = coroutine.resume(req, packet)
   if ret and response then MESSAGEMAN:Broadcast("Response", ret) end
   sending = false
 end
