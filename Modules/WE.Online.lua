@@ -64,7 +64,7 @@ local function receive_request()
     (is this even needed?) ~Sudo
   --]]
   if sending then return end
-  local packet = File.Read(path.."receive.text")
+  local packet = File.Read(path.."receive.txt")
   if packet == "" then return end
   MESSAGEMAN:Broadcast("Response", packet)
 end

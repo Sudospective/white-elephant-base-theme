@@ -28,7 +28,7 @@ af[#af + 1] = Def.Quad {
 
 af[#af + 1] = Def.Text {
   Font = THEME:GetPathF("", "GreyQo.ttf"),
-  Text = "Select Profile",
+  Text = "Enter Name",
   Size = 32,
   StrokeSize = 2,
   InitCommand = function(self)
