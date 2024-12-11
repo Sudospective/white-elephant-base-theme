@@ -122,62 +122,79 @@ end
 
 actor.ResponseMessageCommand = function(self, ret)
   print("WEOnline", "Command "..ret.command.." received.")
-  if ret.command == -1 then
-    err(ret.data.message..".")
-  elseif ret.command == server_offset + 0 then -- Ping
-    local packet = {
-      command = 1,
-      data = {
-        message = "Pong"
-      }
-    }
-    send_request(packet, false)
-  elseif ret.command == server_offset + 1 then -- Ping Response
-    ping = ret.data.delay
-    print("WEOnline", "Ping took "..ping.."ms.")
-  elseif ret.command == server_offset + 2 then -- Hello
-    switch (ret.status) {
-      connected = function()
-        msg("Connected to server.")
-      end,
-      inactive = function()
-        err("Unable to connect to server.")
-      end,
-      unknown = function()
-        err("Unknown connection status.")
-      end,
-    }
-  elseif ret.command == server_offset + 3 then -- Client Event (DO NOT SEND PACKET HERE)
-    switch (ret.data.action) {
-      [0] = function()
-        if ret.data.message == "Success" then
-          print("WEOnline", "Successfully joined room.")
-        end
-      end,
-    }
-  elseif ret.command == server_offset + 4 then -- Server Event
-    switch (ret.data.action) {
-      [0] = function()
-        PrintTable(ret.data.players)
-        local packet = {
-          command = 4,
-          data = {
-            action = 0,
-            message = "OK",
-          },
+  switch (ret.command) {
+    -- Error
+    [-1] = function()
+      err(ret.data.message..".")
+    end,
+    -- Ping
+    [server_offset + 0] = function()
+      local packet = {
+        command = 1,
+        data = {
+          message = "Pong"
         }
-        send_request(packet, false)
-      end
-    }
-  elseif ret.command == server_offset + 5 then -- White Elephant Event
-    switch (ret.data.action) {
-
-    }
-  elseif ret.command == server_offset + 6 then -- StepMania Event
-    switch (ret.data.action) {
-
-    }
-  end
+      }
+      send_request(packet, false)
+    end,
+    -- Ping Response
+    [server_offset + 1] = function()
+      ping = ret.data.delay
+      print("WEOnline", "Ping took "..ping.."ms.")
+    end,
+    -- Hello
+    [server_offset + 2] = function()
+      switch (ret.status) {
+        connected = function()
+          msg("Connected to server.")
+        end,
+        inactive = function()
+          err("Unable to connect to server.")
+        end,
+        unknown = function()
+          err("Unknown connection status.")
+        end,
+      }
+    end,
+    -- Client Event (DO NOT SEND PACKET HERE)
+    [server_offset + 3] = function()
+      switch (ret.data.action) {
+        [0] = function()
+          if ret.data.message == "Success" then
+            print("WEOnline", "Successfully joined room.")
+          end
+        end,
+      }
+    end,
+    -- Server Event
+    [server_offset + 4] = function()
+      switch (ret.data.action) {
+        [0] = function()
+          PrintTable(ret.data.players)
+          local packet = {
+            command = 4,
+            data = {
+              action = 0,
+              message = "OK",
+            },
+          }
+          send_request(packet, false)
+        end
+      }
+    end,
+    -- White Elephant Event
+    [server_offset + 5] = function()
+      switch (ret.data.action) {
+  
+      }
+    end,
+    -- StepMania Event
+    [server_offset + 6] = function()
+      switch (ret.data.action) {
+  
+      }
+    end,
+  }
 end
 
 for k, v in pairs(we) do
