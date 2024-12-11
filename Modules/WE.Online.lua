@@ -20,6 +20,16 @@ local function err(m)
   SCREENMAN:SystemMessage("WEOnline Error: "..m)
 end
 
+local function switch(val)
+  return function(t)
+    if not t[val] then
+      if t._ then t._() end
+      return
+    end
+    t[val]()
+  end
+end
+
 local function send_request(packet, response)
   sending = true
   response = response or true
@@ -126,38 +136,47 @@ actor.ResponseMessageCommand = function(self, ret)
     ping = ret.data.delay
     print("WEOnline", "Ping took "..ping.."ms.")
   elseif ret.command == server_offset + 2 then -- Hello
-    status = ret.status
-    if status == "connected" then
-      msg("Connected to server.")
-    elseif status == "inactive" then
-      err("Unable to connect to server.")
-    elseif status == "unknown" then
-      err("Unknown connection status.")
-    end
+    switch (ret.status) {
+      connected = function()
+        msg("Connected to server.")
+      end,
+      inactive = function()
+        err("Unable to connect to server.")
+      end,
+      unknown = function()
+        err("Unknown connection status.")
+      end,
+    }
   elseif ret.command == server_offset + 3 then -- Client Event (DO NOT SEND PACKET HERE)
-    local action = ret.data.action
-    if action == 0 then
-      if ret.data.message == "Success" then
-        print("WEOnline", "Successfully joined room.")
-      end
-    end
+    switch (ret.data.action) {
+      [0] = function()
+        if ret.data.message == "Success" then
+          print("WEOnline", "Successfully joined room.")
+        end
+      end,
+    }
   elseif ret.command == server_offset + 4 then -- Server Event
-    local action = ret.data.action
-    if action == 0 then
-      PrintTable(res.data.players)
-      local packet = {
-        command = 4,
-        data = {
-          action == 0,
-          message == "OK"
+    switch (ret.data.action) {
+      [0] = function()
+        PrintTable(ret.data.players)
+        local packet = {
+          command = 4,
+          data = {
+            action = 0,
+            message = "OK",
+          },
         }
-      }
-      send_request(packet, false)
-    end
+        send_request(packet, false)
+      end
+    }
   elseif ret.command == server_offset + 5 then -- White Elephant Event
-    local action = ret.data.action
+    switch (ret.data.action) {
+
+    }
   elseif ret.command == server_offset + 6 then -- StepMania Event
-    local action = ret.data.action
+    switch (ret.data.action) {
+
+    }
   end
 end
 
